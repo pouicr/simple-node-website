@@ -5,7 +5,7 @@ var menuitems =[
 ];
 
 module.exports = function(req, res, next){
-    req.session.user_id = 'pouic';
+    req.session.user_id = 'toto';
     req.param.menu = menuitems;
     return next();
 }
