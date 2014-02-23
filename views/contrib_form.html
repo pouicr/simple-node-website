@@ -32,27 +32,31 @@
     <div class="container-fluid">
       <section class="main">
        <h1>Submit a Contribution</h1>
-          {{#configurations}}
-          	<p>{{configurations.submission_introduction}}</p>
-          {{/configurations}}
-
-          <form action="/submit/{{contrib_id}}" method="post" class="form form-horizontal">	
+          <form action="/submit/{{contrib._id}}" method="post" class="form form-horizontal">	
             <div class="row-fluid">
+            {{#error}} 
+                <div class="alert">  
+                    <a class="close" data-dismiss="alert">×</a>  
+                    <strong>Validation error!</strong>  {{error}} 
+                </div>
+            {{/error}} 
 	        <dt>General information</dt>
+            {{#contrib}}
 	        <dd>
 	             <div class="control-group">
 	          	    <label class="control-label" for="title">Title:</label>
 	                <div class="controls">
-	              	    <input type="text" name="title" id="title" value="{{data_title}}"/>
+	              	    <input type="text" name="title" id="title" value="{{title}}"/>
 	                </div>
                 </div>
 	            <div class="control-group">
                     <label class="control-label" for="sum">Sum:</label>
                     <div class="controls">
-                  	    <input type="text" name="sum" id="sum" value="{{data_sum}}"/>
+                  	    <input type="text" name="sum" id="sum" value="{{sum}}"/>
 	                </div>
                 </div>
 		</dd>
+          {{/contrib}}
             </div>
             <div class="commands">
               <button type="submit" class="btn btn-primary btn-large"><i class="icon-upload icon-white"></i>Submit</button>

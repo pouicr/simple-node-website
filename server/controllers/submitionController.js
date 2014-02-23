@@ -21,7 +21,7 @@ module.exports = {
 		                return res.redirect('/form/'+myContrib._id);
                     });
                 }else{
-                    return res.redirect('/form');
+                    return res.send(403);
                 }
             });
         }else{
@@ -36,22 +36,22 @@ module.exports = {
         var id = req.params.contrib_id;
         if(id){
             Contrib.findOne({_id: id},function(err,result){
-    		    if(err){console.log('err : '+err);next(err);}
+    		    if(err){console.log('err : '+err); return next(err);}
     		    if(result){
                     if(result.author != req.session.user_id){
                         return res.send(403);
                     }
-		            return res.render('contrib_form',{menuitems:req.param.menu,contrib_id:result._id, data_title:result.title, data_sum:result.sum});
+		            return res.render('contrib_form',{menuitems:req.param.menu,contrib : result});
 		        }
 	        });
         }else{
-            return res.render('contrib_form',{menuitems:req.param.menu});
+            return res.render('contrib_form',{menuitems:req.param.menu,contrib:{}});
         }
 	},
     list: function (req, res, next){
         var user = req.session.user_id;
 		Contrib.find({author: user},function(err,result){
-		    if(err){console.log('err : '+err);next(err);}
+		    if(err){console.log('err : '+err); return next(err);}
 		    var data;
 		    if (!result){
 		        data = {menuitems:req.param.menu, contribs : []};
@@ -60,5 +60,32 @@ module.exports = {
 		    }
     		return res.render('contrib_list',data);
 		});
-	}
+	},
+    validate: function (req, res, next){
+        var id = req.params.contrib_id;
+	    if (!req.body.title || !req.body.sum){
+	        req.params.error = 'Missing required data';
+	        return res.render('contrib_form',{menuitems:req.param.menu,error:'Missing required data',contrib : {_id:req.params.contrib_id, title: req.body.title, sum: req.body.sum}});
+	    }else{
+	        return next();
+	    }
+	},
+	csv_export: function (req, res, next){
+        if('cypher' != req.params.user){
+            return res.send(403);
+        }else{
+            Contrib.find({},function(err,result){
+                if(err){console.log('err : '+err); return next(err);}
+                var data = "";
+                result.forEach(function (contrib) {
+                    data += contrib.author;
+                    data += "; " + contrib.title;
+                    data += "; " + contrib.sum;
+                    data += "\n";
+                });
+                res.header('Content-type', 'text/csv');
+                res.send(data);
+            });
+        }
+    }
 }
