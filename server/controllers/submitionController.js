@@ -10,7 +10,7 @@ module.exports = {
             myContrib = Contrib.findOne({_id: id},function(err,result){
                 if(err){console.log('err : '+err); return next(err);}
                 if(result){
-                    if(result.author != req.session.user_id){
+                    if(result.author != req.session.user.id){
                        return res.send(403);
                     }
                     myContrib = result;
@@ -25,7 +25,7 @@ module.exports = {
                 }
             });
         }else{
-            myContrib = new Contrib({author: req.session.user_id, title: req.body.title, sum: req.body.sum});
+            myContrib = new Contrib({author: req.session.user.id, title: req.body.title, sum: req.body.sum});
             myContrib.save(function(err,result){
                 if(err){console.log('err : '+err); return next(err);}
 		        return res.redirect('/form/'+result._id);
@@ -38,25 +38,24 @@ module.exports = {
             Contrib.findOne({_id: id},function(err,result){
     		    if(err){console.log('err : '+err); return next(err);}
     		    if(result){
-                    if(result.author != req.session.user_id){
+                    if(result.author != req.session.user.id){
                         return res.send(403);
                     }
-		            return res.render('contrib_form',{menuitems:req.param.menu,contrib : result});
+		            return res.render('contrib_form',{user:req.session.user,contrib : result});
 		        }
 	        });
         }else{
-            return res.render('contrib_form',{menuitems:req.param.menu,contrib:{}});
+            return res.render('contrib_form',{user:req.session.user,contrib:{}});
         }
 	},
     list: function (req, res, next){
-        var user = req.session.user_id;
-		Contrib.find({author: user},function(err,result){
+		Contrib.find({author: req.session.user.id},function(err,result){
 		    if(err){console.log('err : '+err); return next(err);}
 		    var data;
 		    if (!result){
-		        data = {menuitems:req.param.menu, contribs : []};
+		        data = {user:req.session.user, contribs : []};
 		    }else{
-		        data = {menuitems:req.param.menu, contribs : result};
+		        data = {user:req.session.user, contribs : result};
 		    }
     		return res.render('contrib_list',data);
 		});
@@ -65,13 +64,13 @@ module.exports = {
         var id = req.params.contrib_id;
 	    if (!req.body.title || !req.body.sum){
 	        req.params.error = 'Missing required data';
-	        return res.render('contrib_form',{menuitems:req.param.menu,error:'Missing required data',contrib : {_id:req.params.contrib_id, title: req.body.title, sum: req.body.sum}});
+	        return res.render('contrib_form',{user:req.session.user,error:'Missing required data',contrib : {_id:req.params.contrib_id, title: req.body.title, sum: req.body.sum}});
 	    }else{
 	        return next();
 	    }
 	},
 	csv_export: function (req, res, next){
-        if('cypher' != req.params.user){
+        if(req.session.user.admin){
             return res.send(403);
         }else{
             Contrib.find({},function(err,result){

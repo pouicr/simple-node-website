@@ -19,12 +19,12 @@
       <div class="navbar-inner">
         <div class="container">
           <ul class="nav">
-            {{#menuitems}}
+            {{#user.menu}}
               <li {{#active}}class="active"{{/active}}><a {{^active}}href="{{link}}"{{/active}}>{{name}}</a></li>
-            {{/menuitems}}
+            {{/user.menu}}
           </ul>
           <div class="user pull-right">
-            <span class="name">Welcome {{user.firstname}}</span><a class="btn" href="{{root}}/logout"><i class="icon-lock"></i></a>
+            <span class="name">Welcome {{user.id}}</span><a class="btn" href="{{root}}/logout"><i class="icon-lock"></i></a>
           </div>
         </div>
       </div>
