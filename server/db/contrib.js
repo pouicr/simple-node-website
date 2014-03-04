@@ -4,6 +4,7 @@ var Contrib = new db.Schema({
     author  :  { type: String, required: true, index: true} //match: /[a-z]/ ,
   , title   :  { type: String, required: true }
   , sum     :  { type: String }
+  , teaser  :  { data: Buffer}
   , date    :  { type: Date, default: Date.now }
 //  , buff  :  Buffer
 });
