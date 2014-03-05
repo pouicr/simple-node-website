@@ -9,7 +9,8 @@
     "less-middleware": "0.1.12",
     "hogan-express": "0.5.2",
     "mongoose": "3.8.7",
-    "validator": "3.4.0"
+    "validator": "3.4.0",
+    "mime" : "1.2.11"
   },
   "scripts": {
     "start": "node server/app.js;"

@@ -1,5 +1,7 @@
 var Contrib = require('../db/contrib'),
-    fs = require('fs');
+    fs = require('fs'),
+    path = require('path'),
+    mime = require('mime');
 
 var submit = function (req, res, next){
     var id = req.params.contrib_id;
@@ -59,13 +61,38 @@ var upload = function (req, res, next){
                 if(result.author != req.session.user.id){
                     return res.send(403);
                 }
-                console.log('start uploading : '+req.files.teaser.path);
-                result.teaser = fs.readFileSync(req.files.teaser.path);
-                result.teaser.contentType = 'image/jpg';
+                console.log('start uploading : '+req.files.teaser);
+                result.teaser.contentType = req.files.teaser.type;
+                result.teaser.data = fs.readFileSync(req.files.teaser.path);
                 console.log('stop uploading ! ');
                 result.save(function(err,resultagain){
                     if(err){console.log('err : '+err); return next(err);}
 	                return res.render('contrib_form',{user:req.session.user,contrib : resultagain});
+                });
+	        }
+        });
+    }else{
+        return res.send(404);;
+    }
+};
+
+var uploadFs = function (req, res, next){
+    var id = req.params.contrib_id;
+    if(id){
+        Contrib.findOne({_id: id},function(err,result){
+		    if(err){console.log('err : '+err); return next(err);}
+		    if(result){
+                if(result.author != req.session.user.id){
+                    return res.send(403);
+                }
+                console.log('start uploading fs: '+req.files.teaser);
+                fs.readFile(req.files.teaser.path, function (err, data) {
+                    var newPath = path.join(__dirname, '..','..', 'uploads',id);
+                    fs.writeFile(newPath, data, function (err) {
+                        if(err){console.log('err : '+err); return next(err);}
+                        console.log('stop uploading fs: ');
+                        return res.render('contrib_form',{user:req.session.user,contrib : result});
+                    });
                 });
 	        }
         });
@@ -81,12 +108,8 @@ var getUpload = function (req, res, next){
         Contrib.findOne({_id: id},function(err,result){
 		    if(err){console.log('err : '+err); return next(err);}
 		    if(result){
-                console.log('data : '+result.teaser)
                 res.setHeader('Content-Type', 'image/png');
-                res.setHeader('Cache-Control', 'private, max-age=60480000');
-                //res.contentType('image/png');
-                res.send(result.teaser);                
-                //return res.send(new Buffer(result.teaser.buffer));
+                res.send(result.teaser.data);  
 	        }
         });
     }else{
@@ -94,6 +117,26 @@ var getUpload = function (req, res, next){
     }
 };
 
+var getUploadFs = function (req, res, next){
+    var id = req.params.contrib_id || '5311100160d4ff3b13577eed';
+    if(id){
+    
+        Contrib.findOne({_id: id},function(err,result){
+		    if(err){console.log('err : '+err); return next(err);}
+		    if(result){
+                var aPath = path.join(__dirname, '..','..', 'uploads',id);
+                var mimetype = mime.lookup(aPath);
+
+                res.setHeader('Content-disposition', 'attachment; filename=' + aPath);
+                res.setHeader('Content-type', mimetype);
+                
+                res.download(aPath);  
+	        }
+        });
+    }else{
+        return res.send(404);;
+    }
+};
 
 var list = function (req, res, next){
 	Contrib.find({author: req.session.user.id},function(err,result){
@@ -142,6 +185,8 @@ module.exports = {
     validate : validate,
     upload : upload,
     getupload : getUpload,
+    uploadfs : uploadFs,
+    getuploadfs : getUploadFs,
     form : form,
     list : list,
     csv_export : csv_export

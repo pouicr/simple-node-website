@@ -73,6 +73,17 @@
                     </div>
                 </div>
           </form>
+          <form action="/uploadfs/{{contrib._id}}" method="post" enctype="multipart/form-data" class="form form-horizontal">	
+                <div class="control-group">
+                    <label class="control-label" for="sum">Teaser:</label>
+                    <div class="controls">
+                  	    <input type="file" name="teaser" id="teaser"/>
+                    </div>
+                    <div class="commands">
+                        <button type="submit" class="btn btn-primary btn-large"><i class="icon-upload icon-white"></i>upload FS</button>
+                    </div>
+                </div>
+          </form>          
       </section>
      </div>
   </body>
